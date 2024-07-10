@@ -1,306 +1,334 @@
-import pygame
+import pygame 
 from constantes import *
 from data import lista
-from funciones import guardar_puntaje,mostrar_mejores_puntajes,mostrar_puntuaciones
 import json
+from funciones import *
 
-#Recorrer la lista guardando en sub-listas: la pregunta, cada opción, el tema y la respuesta correcta.
-lista_preguntas = []
-lista_opcion_a = []
-lista_opcion_b = []
-lista_opcion_c = []
-lista_tema = []
-lista_respuestas_correcta = []
 
-for i in lista:
-    lista_preguntas.append(i['pregunta'])
-    lista_opcion_a.append(i['a'])
-    lista_opcion_b.append(i['b'])
-    lista_opcion_c.append(i['c'])
-    lista_respuestas_correcta.append(i['correcta'])
-    lista_tema.append(i['tema'])
-
-#INICIALIZACION DE VARIABLES
-preguntas = ""
+pregunta = ""
+texto_pregunta = []
+texto_respuesta_a = []
+texto_respuesta_b = []
+texto_respuesta_c = []
 respuesta_a = ""
 respuesta_b = ""
 respuesta_c = ""
+respuesta_correcta = ""
+respuesta_elegida = ""
+lista_preguntas = []
+lista_respuesta_a = []
+lista_respuesta_b = []
+lista_respuesta_c = []
+lista_respuesta_correcta = []
+tiempo = 0
 posicion = 0
 puntaje = 0
-errores = 0
-respuesta_correcta = False
-segundos = "5"
-fin_tiempo = False
-pos_img = [0,0]
-pos_x, pos_y = 0, 0
-casillas_avanza_1 = [6]  
-casillas_retrocede_2 = [12]
+nombre = ""
 
-#----------------- INICIO PYGAME ------------------
+for e_lista in lista:
+    lista_preguntas.append(e_lista["pregunta"])
+    lista_respuesta_a.append(e_lista["a"])
+    lista_respuesta_b.append(e_lista["b"])
+    lista_respuesta_c.append(e_lista["c"])
+    lista_respuesta_correcta.append(e_lista["correcta"])
+
+
 pygame.init()
 
-#-------TIMER------
-timer_segundos = pygame.USEREVENT
-pygame.time.set_timer(timer_segundos,1000)
-#------SONIDOS------
-pygame.mixer.init()
-sonido_fondo = pygame.mixer.Sound("sonidos\music.wav")
-sonido_lost = pygame.mixer.Sound("sonidos\BD19.WAV")
-sonido_avanza = pygame.mixer.Sound("sonidos\SONIC.wav")
-volumen = 0.12
-sonido_fondo.set_volume(volumen)
-
-pantalla = pygame.display.set_mode((ANCHO_VENTANA,ALTO_VENTANA))
+pantalla = pygame.display.set_mode((ANCHO_VENTANA, ALTO_VENTANA))
 pygame.display.set_caption("Carrera UTN")
 
-#--------IMAGENES----
+#--------FUENTES-----
+fuente = pygame.font.SysFont("Impact", 30,False,True)
+fuente_mini = pygame.font.SysFont("Impact", 35,False,True)
+fuente_dos = pygame.font.SysFont("Arial", 18)
+fuente_tres = pygame.font.SysFont("Impact", 12,False,True)
+fuente_pregunta = pygame.font.SysFont("Impact",20)
+
+#-----TEXTOS--
+# texto_pregunta = fuente_dos.render(str(pregunta), True, COLOR_NEGRO)
+texto_respuesta_a_ = fuente_dos.render(str(respuesta_a), True, COLOR_BLANCO)
+texto_respuesta_b_ = fuente_dos.render(str(respuesta_b), True, COLOR_BLANCO)
+texto_respuesta_c_ = fuente_dos.render(str(respuesta_c), True, COLOR_BLANCO)
+texto_tiempo = fuente.render(str("Tiempo: "), True, COLOR_BLANCO)
+texto_puntaje_txt = fuente.render(str("Puntaje: "), True, COLOR_BLANCO)
+texto_puntaje = fuente.render(str("0"), True, COLOR_BLANCO)
+
+texto_avanza_uno = fuente_tres.render(str("Avanza 1"), True, COLOR_NEGRO)
+texto_retrocede_uno = fuente_tres.render(str("Retrocede 1"), True, COLOR_NEGRO)
+texto_vuelve_inicio = fuente_tres.render(str("Vuelve al"), True, COLOR_NEGRO)
+texto_vuelve_inicio_2 = fuente_tres.render(str("inicio"), True, COLOR_NEGRO)
+
+#-------IMAGENES-------
 fondo = pygame.image.load("imagenes\sand_brick.png") 
 fondo = pygame.transform.scale(fondo,(ANCHO_VENTANA,ALTO_VENTANA))
-imagen = pygame.image.load("imagenes\portada.png")
-imagen= pygame.transform.scale(imagen,(280,200))
+imagen_principal = pygame.image.load("imagenes\portada.png")
+imagen_principal = pygame.transform.scale(imagen_principal, (240, 220))
 
-imagen_utn = pygame.image.load("imagenes\dfile.png")
-imagen_utn = pygame.transform.scale(imagen_utn,(90,70))
-rect_utn = pygame.Rect(120,400,175,350)
-imagen_personaje = pygame.image.load("imagenes\personaje.png")
-imagen_personaje = pygame.transform.scale(imagen_personaje,(90,90))
-rect_personaje = pygame.Rect(120,260,175,350)
-
-imagen_flecha = pygame.image.load("imagenes\dflecha.png")
-imagen_flecha = pygame.transform.scale(imagen_flecha,(70,55))
 img_star = pygame.image.load("imagenes\start_btn.png")
 img_star= pygame.transform.scale(img_star,(130,70))
 img_exit = pygame.image.load("imagenes\exit_btn.png")
 img_exit = pygame.transform.scale(img_exit,(130,70))
 
-#-------TIPOS DE FUENTE--------
-fuente =  pygame.font.SysFont("Impact", 20)
-fuente_dos =  pygame.font.SysFont("Impact", 15)
-fuente_mini =  pygame.font.SysFont("Impact", 35,False,True)
-fuente_preguntas = pygame.font.SysFont("Arial", 30, True, True)
+imagen_personaje = pygame.image.load("imagenes\personaje.png")
+imagen_personaje = pygame.transform.scale(imagen_personaje, (55, 120))
 
-texto_tiempo_txt = fuente_mini.render("TIEMPO: ", True, COLOR_BLANCO)
-texto_puntaje_txt = fuente_mini.render("PUNTAJE: ", True,COLOR_BLANCO)
+imagen_utn = pygame.image.load("imagenes\dfile.png")
+imagen_utn = pygame.transform.scale(imagen_utn, (130, 80))
 
-texto_pregunta = fuente_mini.render(str(preguntas),True,COLOR_BLANCO )
-texto_respuesta_a = fuente.render(str(respuesta_a), True,COLOR_NEGRO)
-texto_respuesta_b = fuente.render(str(respuesta_b), True,COLOR_NEGRO)
-texto_respuesta_c = fuente.render(str(respuesta_c), True,COLOR_NEGRO)
-texto_puntaje = fuente_mini.render(str(puntaje),True,COLOR_BLANCO )
-texto_avanza_dos = fuente_dos.render(str("AVANZA 1"), True, COLOR_BLANCO)
-texto_retrocede_uno = fuente_dos.render(str("RETROCEDE 1"), True, COLOR_BLANCO)
+#---TIMER-----
+timer_segundos = pygame.USEREVENT
+pygame.time.set_timer(timer_segundos, 1000) # 1000 es un segundo
+segundos = "5"
+timer_total = TIEMPO_MAXIMO_SEGUNDOS 
 
-posiciones_tablero = [(140,280), # Posición inicial (partida) 
-    (205, 280),  
-    (285, 280),
-    (365, 280),
-    (445, 280),
-    (525, 280),
-    (605, 280),
-    (685, 280),
-    (765, 280),
-    (765, 400),
-    (685, 400),
-    (605, 400),
-    (525, 400),
-    (445, 400),
-    (365, 400),
-    (285, 400),
-    (205, 400),
-    (250, 400)   # Posición final (meta)
-]
+#----SONIDOS----
+pygame.mixer.init()
+sonido_fondo = pygame.mixer.Sound("sonidos\music.wav")
+sonido_lost = pygame.mixer.Sound("sonidos\BD19.WAV")
+sonido_avanza = pygame.mixer.Sound("sonidos\SONIC.wav")
+sonido_correcto = pygame.mixer.Sound("sonidos\q7607.mp3")
+sonido_error = pygame.mixer.Sound("sonidos\error.mp3")
+sonido_vuelve_principio = pygame.mixer.Sound("sonidos\cuak.mp3")
+volumen = 0.12
+sonido_fondo.set_volume(volumen)
 
-flag_correr = True
-flag_btn_star = False
-flag_btn_exit = False
-ingresando_nombre = False
-nombre_jugador = ""
+#---RECTANGULOS--
+rect_btn_star = pygame.Rect(255, 495, 130, 70)
+rect_btn_exit = pygame.Rect(500, 500, 130, 70)
+rect_utn = pygame.Rect(100, 200, 150, 40)
+rect_logo = pygame.Rect(200, 400, 150, 40)
+rect_personaje = pygame.Rect(120, 240, 150, 40)
+rect_opcion_a =pygame.Rect(245,110,120,120)
+rect_opcion_b =pygame.Rect(370,110,120,120)
+rect_opcion_c = pygame.Rect(500,110,120,120)
+rect_finish = pygame.Rect(55, 375, 150, 40)
 
-while flag_correr:
-    
+#---BANDERAS---
+flag_run = True
+tiempo_iniciado = False
+fin_tiempo = False
+
+
+while flag_run:
     lista_eventos = pygame.event.get()
-
     for evento in lista_eventos:
         if evento.type == pygame.QUIT:
-            flag_correr = False
+            flag_run = False
         if evento.type == pygame.MOUSEBUTTONDOWN:
             click = list(evento.pos)
             print(click)
-    
-    #---------------------------------MENU PRINCIPAL------------------------------------
-            if (click[0] > 255 and click[0] < 390 ) and (click[1] > 495 and click[1] < 570):
-        
-                sonido_fondo.play()
-                flag_btn_star = True    
-                errores = 0
-                respuesta_correcta = False
-                ingresando_nombre = False
+            #COLLIDEPOINT ENTRE EL CLICK Y BOTON START
+            if rect_btn_star.collidepoint(click):
+                pregunta = lista_preguntas[posicion]
+                respuesta_a = lista_respuesta_a[posicion]
+                respuesta_b = lista_respuesta_b[posicion]
+                respuesta_c = lista_respuesta_c[posicion]
+                respuesta_correcta = lista_respuesta_correcta[posicion]
+                texto_pregunta = render_texto(pregunta, fuente_pregunta, COLOR_BLANCO, 350)
+                texto_respuesta_a = render_texto(respuesta_a, fuente_pregunta, COLOR_BLANCO, 100)
+                texto_respuesta_b = render_texto(respuesta_b, fuente_pregunta, COLOR_BLANCO, 100)
+                texto_respuesta_c = render_texto(respuesta_c, fuente_pregunta, COLOR_BLANCO, 100)
+                tiempo_iniciado = True
+                segundos = 5
+                timer_total = TIEMPO_MAXIMO_SEGUNDOS 
+            #COLLIDEPOINT ENTRE EL CLICK Y BOTON EXIT
+            elif rect_btn_exit.collidepoint(click):
+                nombre = pedir_nombre(pantalla, fuente)
+                if nombre:
+                    guardar_puntaje(nombre, puntaje)
+                    mostrar_mejores_puntajes(pantalla, fuente)
+                pregunta = ""
+                respuesta_a = ""
+                respuesta_b = ""
+                respuesta_c = ""
+                texto_pregunta = []
+                texto_respuesta_a = []
+                texto_respuesta_b = []
+                texto_respuesta_c = []
                 puntaje = 0
                 posicion = 0
                 segundos = 5
-    #--------------------------------REINICIAR/TERMINAR------------------------ 
-            if (click[0]>500 and click[0]<635) and (click[1]>500 and click[1]<570):
-                flag_btn_exit = True
-                flag_btn_star = False
-                puntajes = json.load(open('puntajes.json', 'r'))
-                mostrar_puntuaciones(pantalla, puntajes)
-               
-            if posicion < len(lista_preguntas):
-        #------------------------------Respuesta A--------------------------------- 
-                if (click[0]> 240 and click[0] < 480) and (click[1] > 80 and click[1] < 200):
-                    if lista_respuestas_correcta[posicion] == "a":
-                        respuesta_correcta = True
-                    else:
-                        errores += 1
-        
-        #------------------------------Respuesta B--------------------------------
-                if (click[0]>480 and click[0]<700) and (click[1]>80 and click[1]<200):   
-                    if lista_respuestas_correcta[posicion] == "b":
-                        respuesta_correcta = True
-                    else:
-                        errores = errores + 1 
+                rect_personaje = pygame.Rect(120, 240, 150, 40)
+                tiempo_iniciado = False
+                timer_total = TIEMPO_MAXIMO_SEGUNDOS 
+            
+            #COLISION CUANDO EL PERSONAJE CHOCA CON LA META FINAL
+            elif rect_personaje.colliderect(rect_finish):
+                nombre = pedir_nombre(pantalla, fuente)
+                if nombre:
+                    guardar_puntaje(nombre, puntaje)
+                    mostrar_mejores_puntajes(pantalla, fuente)
+                pregunta = ""
+                respuesta_a = ""
+                respuesta_b = ""
+                respuesta_c = ""
+                texto_pregunta = []
+                texto_respuesta_a = []
+                texto_respuesta_b = []
+                texto_respuesta_c = []
+                puntaje = 0
+                posicion = 0
+                segundos = 5
+                rect_personaje = pygame.Rect(120, 240, 150, 40)
+                tiempo_iniciado = False
+                timer_total = TIEMPO_MAXIMO_SEGUNDOS 
 
-        ##------------------------------Respuesta C--------------------------------
-                if (click[0] > 700 and click[0] < 940) and (click[1]>80 and click[1]<200):                   
-                    if  lista_respuestas_correcta[posicion] == "c":
-                        respuesta_correcta = True
-                    else:
-                        errores = errores + 1 
-                
-                
-                #-----------MOVER PERSONAJE--------
-                if respuesta_correcta:
-                    puntaje += 10
-                    texto_puntaje = fuente_mini.render(str(puntaje), True, COLOR_BLANCO)
-                    if posicion + 1 < len(posiciones_tablero):
-                        posicion += 2
-                    else:
-                        posicion = len(posiciones_tablero) - 1
-
-                    if posicion in casillas_avanza_1:
-                        sonido_avanza.play()
-                        if posicion + 1 < len(posiciones_tablero):
-                            posicion += 1
-                    elif posicion in casillas_retrocede_2:
-                        sonido_lost.play()
-                        if posicion - 2 >= 0:
-                            posicion -= 1
-
-                    pos_x, pos_y = posiciones_tablero[posicion]
-                    respuesta_correcta = False
-                    segundos = 5
-
-                if errores > 0:
-                    if posicion - 1 >= 0:
-                        posicion -= 1
-                    # else:
-                    #     posicion = 0
-                    pos_x, pos_y = posiciones_tablero[posicion]
-                    errores = 0
-                    segundos = 5
-
-                    #------MANEJO TIEMPO---------
-
-        if evento.type == pygame.USEREVENT and flag_btn_star == True:
-            segundos = int (segundos) -1
-            if int(segundos) == -1:
-                # if respuesta_correcta:
-                if posicion + 1 <len(lista_preguntas):
-                    posicion +=1
+            #--------ELECCION DE RESPUESTAS----
+            if tiempo_iniciado:  
+                if rect_opcion_a.collidepoint(click):
+                    respuesta_elegida = "a"
+                elif rect_opcion_b.collidepoint(click):
+                    respuesta_elegida = "b"
+                elif rect_opcion_c.collidepoint(click):
+                    respuesta_elegida = "c"
                 else:
-                    posicion = len(lista_preguntas) - 1
-                segundos = 5  # Reiniciar el tiempo
-                pos_x, pos_y = posiciones_tablero[posicion]
-                respuesta_correcta = False 
-
-        if evento.type == pygame.KEYDOWN and ingresando_nombre:
-            if evento.key == pygame.K_RETURN:
-                guardar_puntaje(nombre_jugador, puntaje)
-                mostrar_mejores_puntajes()
-                ingresando_nombre = False
-                flag_btn_exit = False
-                nombre_jugador = ""
-            else:
-                nombre_jugador += evento.unicode
-
-    if flag_btn_exit and not ingresando_nombre:
-        puntajes = json.load(open('puntajes.json', 'r'))
-        mostrar_puntuaciones(pantalla, puntajes)
-        ingresando_nombre= True
+                    respuesta_elegida = None
+                #--------MOVIMIENTO DEL PERSONAJE POR CORDENADAS----
+                if respuesta_elegida == respuesta_correcta:
+                    sonido_correcto.play()
+                    puntaje += 10
+                    if rect_personaje.x < 570 and rect_personaje.y < 375: #mover de a dos casilleros 
+                        rect_personaje.move_ip(130, 0)
+                    elif rect_personaje.x > 570 and rect_personaje.x < 630 and rect_personaje.y < 375: #saltar a la fila de abajo
+                        rect_personaje.x = 640
+                        rect_personaje.y = 375
+                    elif rect_personaje.x > 630 and rect_personaje.y < 375:  #saltar a la fila de abajo
+                        rect_personaje.x = 570
+                        rect_personaje.y = 375
+                    elif rect_personaje.x > 70 and rect_personaje.y > 370: #avanzar en fila de abajo
+                        rect_personaje.move_ip(-130, 0)
+                    elif rect_personaje.x < 300 and rect_personaje.y > 375:  #va a la llegada en cualquiera de los ultimos dos casilleros
+                        if respuesta_elegida == respuesta_correcta:
+                            rect_personaje.x = 70
+                            rect_personaje.y = 375
+                            nombre = pedir_nombre(pantalla, fuente)
+                            if nombre:
+                                guardar_puntaje(nombre, puntaje)
+                                mostrar_mejores_puntajes(pantalla, fuente)
                 
-    #------------------PANTALLA------------------------
-    pantalla.blit(fondo, (0,0))
-    pantalla.blit(imagen_personaje, posiciones_tablero[posicion])
-    # pantalla.blit(imagen_utn, posiciones_tablero[-1])
-    
-    if flag_btn_star:
-        if posicion < len(lista_preguntas):
-            pregunta = lista_preguntas[posicion]
-            respuesta_a = lista_opcion_a[posicion]
-            respuesta_b =  lista_opcion_b[posicion]
-            respuesta_c = lista_opcion_c[posicion]
-
-            texto_pregunta = fuente.render(str(pregunta), True, COLOR_BLANCO)
-            texto_respuesta_a = fuente.render(str(respuesta_a), True,COLOR_BLANCO)
-            texto_respuesta_b = fuente.render(str(respuesta_b), True,COLOR_BLANCO)
-            texto_respuesta_c = fuente.render(str(respuesta_c), True,COLOR_BLANCO)
-            segundos_tiempo = fuente_mini.render(str(segundos),True, COLOR_BLANCO)
-
-            # pantalla.blit(imagen_personaje,rect_personaje)
-            pantalla.blit(imagen_utn,rect_utn)
-            pantalla.blit(texto_tiempo_txt,(750, 470))
-            pantalla.blit(texto_puntaje_txt,(750, 530))
-            pantalla.blit(segundos_tiempo,(880,470))
-            pantalla.blit(texto_pregunta,(450,50))
-            pantalla.blit(texto_respuesta_a,(340,143))
-            pantalla.blit(texto_respuesta_b,(540,143))
-            pantalla.blit(texto_respuesta_c,(760,143)) 
-            pantalla.blit(texto_puntaje,(880,530))
-            pantalla.blit(imagen_flecha,(776, 346))
-            pantalla.blit(texto_avanza_dos,(620,315))
-            pantalla.blit(texto_retrocede_uno,(540,415))
-            pantalla.blit(imagen_personaje, (pos_x, pos_y))
-
-             #ESCALONES HACIA LA META
-            pygame.draw.ellipse(pantalla, LIGHT_BLUE,(220,300,60,50),1)
-            pygame.draw.ellipse(pantalla, PURPLE,(300,300,60,50),1)
-            pygame.draw.ellipse(pantalla, PINK,(380,300,60,50),1)
-            pygame.draw.ellipse(pantalla, TURQUESA,(460,300,60,50),1)
-            pygame.draw.ellipse(pantalla, YELLOW_GREEN,(540,300,60,50),1)
-            pygame.draw.ellipse(pantalla, NAVY,(620,300,60,50),1)
-            pygame.draw.ellipse(pantalla, DARK_RED,(700,300,60,50),1)
-            pygame.draw.ellipse(pantalla, CYAN,(780,300,60,50),1)
-
-            pygame.draw.ellipse(pantalla, CYAN,(780,400,60,50),1)
-            pygame.draw.ellipse(pantalla, DARK_RED,(700,400,60,50),1)
-            pygame.draw.ellipse(pantalla, NAVY,(620,400,60,50),1)
-            pygame.draw.ellipse(pantalla, YELLOW_GREEN,(540,400,60,50),1)
-            pygame.draw.ellipse(pantalla, TURQUESA,(460,400,60,50),1)
-            pygame.draw.ellipse(pantalla, PINK,(380,400,60,50),1)
-            pygame.draw.ellipse(pantalla, PURPLE,(300,400,60,50),1)
-            pygame.draw.ellipse(pantalla, LIGHT_BLUE,(220,400,60,50),1)
-        else:
-            texto_fin = fuente.render("JUEGO TERMINADO!", True, COLOR_BLANCO)
-            texto_puntaje_final = fuente.render(f"PUNTAJE FINAL: {puntaje}", True, COLOR_BLANCO)
-            pantalla.blit(texto_fin, (370,200))
-            pantalla.blit(texto_puntaje_final, (400,240))
-            ingresando_nombre = True
-            flag_btn_star = False
-            segundos = 5 
-
-    elif ingresando_nombre:
-        pantalla.blit(fondo, (0,0))
-        pantalla.blit(imagen_personaje, posiciones_tablero[posicion])
-        texto = fuente_mini.render(f"Nombre: {nombre_jugador}", True, COLOR_BLANCO)
-        pantalla.blit(texto, (220, 300))
-    else:
-        pantalla.blit(imagen,(pos_img))
-        pantalla.blit(img_exit, (500,500)) 
-        pantalla.blit(img_star, (260,500))
+                elif respuesta_elegida is not respuesta_correcta and respuesta_elegida is not None:
+                    sonido_error.play()
+                    if rect_personaje.x == 120 and rect_personaje.y == 240:
+                        rect_personaje.x = 120
+                        rect_personaje.y = 240
+                    elif rect_personaje.x < 700 and rect_personaje.y < 375:
+                        rect_personaje.move_ip(-65, 0)
+                    elif rect_personaje.x > 630 and rect_personaje.y > 350:
+                        rect_personaje.x = 635
+                        rect_personaje.y = 250
+                    elif rect_personaje.x > 70 and rect_personaje.y > 370:
+                        rect_personaje.move_ip(65, 0)
+                        
+                
+                #----ACTUALIZACION DEL PUNTAJE
+                texto_puntaje = fuente.render(str(puntaje), True, COLOR_BLANCO)
+                #---VERIFICACION SI SE PASARON TODAS LAS PREGUNTAS---
+                if posicion < len(lista_preguntas):
+                    pregunta = lista_preguntas[posicion]
+                    respuesta_a = lista_respuesta_a[posicion]
+                    respuesta_b = lista_respuesta_b[posicion]
+                    respuesta_c = lista_respuesta_c[posicion]
+                    respuesta_correcta = lista_respuesta_correcta[posicion]
+                    texto_pregunta = render_texto(pregunta, fuente_pregunta, COLOR_BLANCO, 350)
+                    texto_respuesta_a = render_texto(respuesta_a, fuente_pregunta, COLOR_BLANCO, 100)
+                    texto_respuesta_b = render_texto(respuesta_b, fuente_pregunta, COLOR_BLANCO, 100)
+                    texto_respuesta_c = render_texto(respuesta_c, fuente_pregunta, COLOR_BLANCO, 100)
+                    segundos = 5  
+                else:
+                    fin_tiempo = True
+                posicion += 1
+        #-----------------TIMER 5 SEGUNDOS PREGUNTAS----------
+        if evento.type == timer_segundos and tiempo_iniciado:
+            if not fin_tiempo:
+                segundos -= 1
+                if segundos == -1:
+                    posicion += 1
+                    if posicion < len(lista_preguntas)-1:
+                        
+                        pregunta = lista_preguntas[posicion]
+                        respuesta_a = lista_respuesta_a[posicion]
+                        respuesta_b = lista_respuesta_b[posicion]
+                        respuesta_c = lista_respuesta_c[posicion]
+                        respuesta_correcta = lista_respuesta_correcta[posicion]
+                        texto_pregunta = render_texto(pregunta, fuente_pregunta, COLOR_BLANCO, 350)
+                        texto_respuesta_a = render_texto(respuesta_a, fuente_pregunta, COLOR_BLANCO, 100)
+                        texto_respuesta_b = render_texto(respuesta_b, fuente_pregunta, COLOR_BLANCO, 100)
+                        texto_respuesta_c = render_texto(respuesta_c, fuente_pregunta, COLOR_BLANCO, 100)
+                        segundos = 5 
+                    else:
+                        fin_tiempo = True
+                        nombre = pedir_nombre(pantalla, fuente)
+                        if nombre:
+                            guardar_puntaje(nombre, puntaje)
+                            mostrar_mejores_puntajes(pantalla, fuente)
         
-    pantalla.blit(imagen,(pos_img))
-    pantalla.blit(img_star,(260,500))
-    pantalla.blit(img_exit,(500,500))
+        #-----------------TIMER RELOJ TOTAL----------
+        if evento.type == timer_segundos and tiempo_iniciado:
+            timer_total -= 1
+            if timer_total <= 0:
+                if not fin_tiempo:
+                    fin_tiempo = True
+                    nombre = pedir_nombre(pantalla, fuente)
+                    if nombre:
+                        guardar_puntaje(nombre, puntaje)
+                        mostrar_mejores_puntajes(pantalla, fuente)
+                    posicion = 0
+                    puntaje = 0
+                    tiempo_iniciado = False
+                    segundos = 5
+                    timer_total = TIEMPO_MAXIMO_SEGUNDOS 
+                    pregunta = ""
+                    respuesta_a = ""
+                    respuesta_b = ""
+                    respuesta_c = ""
+                    texto_pregunta = []
+                    texto_respuesta_a = []
+                    texto_respuesta_b = []
+                    texto_respuesta_c = []
+                    rect_personaje = pygame.Rect(120, 240, 150, 40)
+            
+        
+    #CASILLEROS DE AVANZA 1, RETROCEDE 1 O VUELVE AL PRINCIPIO
+    if rect_personaje.x > 505 and rect_personaje.x < 560 and rect_personaje.y < 340:
+        sonido_avanza.play()
+        rect_personaje.move_ip(65, 0)
+    elif rect_personaje.x > 375 and rect_personaje.x < 435 and rect_personaje.y > 340:
+        sonido_lost.play()
+        rect_personaje.move_ip(65, 0)
+    elif rect_personaje.x > 630 and rect_personaje.x < 690 and rect_personaje.y < 340:
+        sonido_vuelve_principio.play()
+        rect_personaje.x = 120  # Vuelve a la posicion inicial del juego
+        rect_personaje.y = 240  
+        puntaje = 0
+        texto_puntaje = fuente.render(str(puntaje), True, COLOR_BLANCO)
     
+    #-------PANTALLA----
+    pantalla.blit(fondo,(0,0))
+    dibujar_rects_escalones(pantalla)
+    #----BLITEO DE SEGUNDOS---
+    segundos_finales = fuente.render(str(f"Reloj: {timer_total}"),True,COLOR_BLANCO)
+    pantalla.blit(segundos_finales,(15,220))
+    segundos_texto = fuente.render(str(segundos), True, COLOR_BLANCO)
+    pantalla.blit(segundos_texto, (720, 35))
+    
+    #---IMAGENES----
+    pantalla.blit(imagen_principal, (0, 0))
+    pantalla.blit(imagen_utn, (40, 400))
+    pantalla.blit(imagen_personaje, (rect_personaje.x, rect_personaje.y))
+    pantalla.blit(img_star,(200,520))
+    pantalla.blit(img_exit,(490,520))
+    
+    #---TEXTOS EN PANTALLA--
+    pantalla.blit(texto_tiempo, (610, 35))
+    pantalla.blit(texto_puntaje_txt, (610, 100))
+    pantalla.blit(texto_puntaje, (720, 100))
+    #----FUNCION QUE MUESTRA LAS PREGUNTAS CON SUS RESPECTIVAS OPCIONES
+    dibujar_textos(pantalla,texto_pregunta,texto_respuesta_a,texto_respuesta_b,texto_respuesta_c)
+    pantalla.blit(texto_avanza_uno, (513, 303))
+    pantalla.blit(texto_retrocede_uno, (376, 425))
+    pantalla.blit(texto_vuelve_inicio, (640, 295))
+    pantalla.blit(texto_vuelve_inicio_2, (650, 310))
+
     pygame.display.flip()
 pygame.quit()

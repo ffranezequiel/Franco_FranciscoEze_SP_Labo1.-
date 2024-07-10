@@ -1,5 +1,6 @@
-ANCHO_VENTANA = 940
-ALTO_VENTANA = 600
+ANCHO_VENTANA = 800
+ALTO_VENTANA = 650
+POS_RECT_PANTALLITA = 320,0,600,310
 #---------colores---------------
 COLOR_BLANCO = (255,255,255)
 COLOR_NEGRO = (0,0,0)
@@ -19,6 +20,7 @@ YELLOW_GREEN = (154, 205, 50)
 NAVY = (0, 0, 128)
 DARK_RED = (139, 0, 0)
 CYAN = (0, 255, 255)
+SALMON2 = (238, 130, 98)
 
 LEFT_TEXTO = 140
 TOP_TEXTO = 430
@@ -35,3 +37,27 @@ DIRECCION_L = 1
 TIEMPO = 0
 SEGUNDOS = 30
 JUGANDO = 0
+TIEMPO_MAXIMO_SEGUNDOS = 30
+
+LISTA_COLORES =[LIGHT_BLUE,PURPLE,PINK,TURQUESA,YELLOW_GREEN,SALMON2,DARK_RED,CYAN]
+
+posiciones_tablero = [(140,280), # Posición inicial (partida) 
+    (205, 280),  
+    (285, 280),
+    (365, 280),
+    (445, 280),
+    (525, 280),
+    (605, 280),
+    (685, 280),
+    (765, 280),
+    (765, 400),
+    (685, 400),
+    (605, 400),
+    (525, 400),
+    (445, 400),
+    (365, 400),
+    (285, 400),
+    (205, 400),
+    (250, 400)   # Posición final (meta)
+]
+
