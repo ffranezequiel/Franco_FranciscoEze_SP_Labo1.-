@@ -75,6 +75,8 @@ imagen_personaje = pygame.transform.scale(imagen_personaje, (55, 120))
 
 imagen_utn = pygame.image.load("imagenes\dfile.png")
 imagen_utn = pygame.transform.scale(imagen_utn, (130, 80))
+imagen_flecha = pygame.image.load("imagenes\dflecha.png")
+imagen_flecha = pygame.transform.scale(imagen_flecha, (130, 80))
 
 #---TIMER-----
 timer_segundos = pygame.USEREVENT
@@ -316,6 +318,7 @@ while flag_run:
     pantalla.blit(imagen_principal, (0, 0))
     pantalla.blit(imagen_utn, (40, 400))
     pantalla.blit(imagen_personaje, (rect_personaje.x, rect_personaje.y))
+    pantalla.blit(imagen_flecha,(660,340))
     pantalla.blit(img_star,(200,520))
     pantalla.blit(img_exit,(490,520))
     
