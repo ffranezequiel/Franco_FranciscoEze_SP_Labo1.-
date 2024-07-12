@@ -23,7 +23,7 @@ lista_respuesta_correcta = []
 tiempo = 0
 posicion = 0
 puntaje = 0
-nombre = ""
+ingresando_nombre = ""
 
 for e_lista in lista:
     lista_preguntas.append(e_lista["pregunta"])
@@ -136,9 +136,9 @@ while flag_run:
                 timer_total = TIEMPO_MAXIMO_SEGUNDOS 
             #COLLIDEPOINT ENTRE EL CLICK Y BOTON EXIT
             elif rect_btn_exit.collidepoint(click):
-                nombre = pedir_nombre(pantalla, fuente)
-                if nombre:
-                    guardar_puntaje(nombre, puntaje)
+                ingresando_nombre = pedir_nombre(pantalla, fuente)
+                if ingresando_nombre:
+                    guardar_puntaje(ingresando_nombre, puntaje)
                     mostrar_mejores_puntajes(pantalla, fuente)
                 pregunta = ""
                 respuesta_a = ""
@@ -157,9 +157,9 @@ while flag_run:
             
             #COLISION CUANDO EL PERSONAJE CHOCA CON LA META FINAL
             elif rect_personaje.colliderect(rect_finish):
-                nombre = pedir_nombre(pantalla, fuente)
-                if nombre:
-                    guardar_puntaje(nombre, puntaje)
+                ingresando_nombre = pedir_nombre(pantalla, fuente)
+                if ingresando_nombre:
+                    guardar_puntaje(ingresando_nombre, puntaje)
                     mostrar_mejores_puntajes(pantalla, fuente)
                 pregunta = ""
                 respuesta_a = ""
@@ -200,13 +200,13 @@ while flag_run:
                         rect_personaje.y = 375
                     elif rect_personaje.x > 70 and rect_personaje.y > 370: #avanzar en fila de abajo
                         rect_personaje.move_ip(-130, 0)
-                    elif rect_personaje.x < 300 and rect_personaje.y > 375:  #va a la llegada en cualquiera de los ultimos dos casilleros
+                    elif rect_personaje.x < 300 and rect_personaje.y > 375: 
                         if respuesta_elegida == respuesta_correcta:
                             rect_personaje.x = 70
                             rect_personaje.y = 375
-                            nombre = pedir_nombre(pantalla, fuente)
-                            if nombre:
-                                guardar_puntaje(nombre, puntaje)
+                            ingresando_nombre = pedir_nombre(pantalla, fuente)
+                            if ingresando_nombre:
+                                guardar_puntaje(ingresando_nombre, puntaje)
                                 mostrar_mejores_puntajes(pantalla, fuente)
                 
                 elif respuesta_elegida is not respuesta_correcta and respuesta_elegida is not None:
@@ -260,9 +260,9 @@ while flag_run:
                         segundos = 5 
                     else:
                         fin_tiempo = True
-                        nombre = pedir_nombre(pantalla, fuente)
-                        if nombre:
-                            guardar_puntaje(nombre, puntaje)
+                        ingresando_nombre = pedir_nombre(pantalla, fuente)
+                        if ingresando_nombre:
+                            guardar_puntaje(ingresando_nombre, puntaje)
                             mostrar_mejores_puntajes(pantalla, fuente)
         
         #-----------------TIMER RELOJ TOTAL----------
@@ -271,9 +271,9 @@ while flag_run:
             if timer_total <= 0:
                 if not fin_tiempo:
                     fin_tiempo = True
-                    nombre = pedir_nombre(pantalla, fuente)
-                    if nombre:
-                        guardar_puntaje(nombre, puntaje)
+                    ingresando_nombre = pedir_nombre(pantalla, fuente)
+                    if ingresando_nombre:
+                        guardar_puntaje(ingresando_nombre, puntaje)
                         mostrar_mejores_puntajes(pantalla, fuente)
                     posicion = 0
                     puntaje = 0
@@ -307,6 +307,7 @@ while flag_run:
     
     #-------PANTALLA----
     pantalla.blit(fondo,(0,0))
+    #------FUNCION QUE DIBUJA LOS ESCALONES---
     dibujar_rects_escalones(pantalla)
     #----BLITEO DE SEGUNDOS---
     segundos_finales = fuente.render(str(f"Reloj: {timer_total}"),True,COLOR_BLANCO)
